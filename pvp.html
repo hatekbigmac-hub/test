@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PvP Arena</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #000000;
+            --card-bg: #111111;
+            --accent: #ff3b30; /* Красный для ПВП */
+            --text-main: #ffffff;
+            --text-hint: #888888;
+        }
+
+        body {
+            font-family: -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0; padding: 20px;
+        }
+
+        /* Статус игрока */
+        .player-status {
+            background: linear-gradient(180deg, #111 0%, #000 100%);
+            border: 1px solid #222;
+            border-radius: 24px;
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .avatar-circle {
+            width: 80px;
+            height: 80px;
+            background: #1a1a1a;
+            border-radius: 50%;
+            margin: 0 auto 12px;
+            border: 2px solid var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar-circle svg { width: 40px; fill: white; }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            border-top: 1px solid #222;
+            padding-top: 15px;
+        }
+
+        .stat-item { display: flex; flex-direction: column; }
+        .stat-val { font-weight: 700; font-size: 18px; }
+        .stat-label { font-size: 11px; color: var(--text-hint); text-transform: uppercase; }
+
+        /* Список NFT снаряжения */
+        .inventory-title { font-size: 14px; color: var(--text-hint); margin-bottom: 12px; text-transform: uppercase; }
+        
+        .nft-item {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            border: 1px solid #222;
+        }
+
+        .nft-icon {
+            width: 40px; height: 40px; background: #000; border-radius: 10px;
+            margin-right: 12px; display: flex; align-items: center; justify-content: center;
+        }
+
+        .nft-icon svg { width: 20px; fill: var(--accent); }
+
+        .nft-info { flex-grow: 1; }
+        .nft-name { font-size: 15px; font-weight: 600; }
+        .nft-power { font-size: 12px; color: var(--accent); }
+
+        .find-match-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="player-status">
+        <div class="avatar-circle">
+            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        </div>
+        <div class="username">Player_One</div>
+        <div class="stats-row">
+            <div class="stat-item"><span class="stat-val">1,240</span><span class="stat-label">Power</span></div>
+            <div class="stat-item"><span class="stat-val">84%</span><span class="stat-label">Win Rate</span></div>
+        </div>
+    </div>
+
+    <div class="inventory-title">Экипированные NFT</div>
+    
+    <div class="nft-item">
+        <div class="nft-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+        </div>
+        <div class="nft-info">
+            <div class="nft-name">Diamond Shield #042</div>
+            <div class="nft-power">+150 Defense</div>
+        </div>
+    </div>
+
+    <div class="nft-item">
+        <div class="nft-icon">
+            <svg viewBox="0 0 24 24"><path d="M13.46 12L19 6.46 17.54 5 12 10.54 6.46 5 5 6.46 10.54 12 5 17.54 6.46 19 12 13.46 17.54 19 19 17.54 13.46 12z"/></svg>
+        </div>
+        <div class="nft-info">
+            <div class="nft-name">Plasma Blade #881</div>
+            <div class="nft-power">+320 Attack</div>
+        </div>
+    </div>
+
+    <button class="find-match-btn" onclick="startSearch()">В БОЙ</button>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.BackButton.show();
+        tg.BackButton.onClick(() => {
+            window.location.href = 'index.html';
+        });
+
+        function startSearch() {
+            tg.HapticFeedback.notificationOccurred('success');
+            const btn = document.querySelector('.find-match-btn');
+            btn.innerText = "ПОИСК ПРОТИВНИКА...";
+            btn.style.opacity = "0.7";
+        }
+    </script>
+</body>
+</html>
