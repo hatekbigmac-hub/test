@@ -3,24 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Game Menu</title>
+    <title>Game Interface</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        /* Темная палитра */
         :root {
-            --bg-color: var(--tg-theme-bg-color, #ffffff);
-            --text-color: var(--tg-theme-text-color, #222222);
-            --hint-color: var(--tg-theme-hint-color, #999999);
-            --button-color: var(--tg-theme-button-color, #2481cc);
-            --button-text: var(--tg-theme-button-text-color, #ffffff);
-            --secondary-bg: var(--tg-theme-secondary-bg-color, #f4f4f5);
+            --bg-color: #000000;
+            --card-bg: #121212;
+            --card-border: #222222;
+            --text-main: #ffffff;
+            --text-hint: #888888;
+            --accent-color: #2481cc; /* Стандартный синий Telegram */
+            --accent-light: #3da2ff;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-color);
+            color: var(--text-main);
             margin: 0;
-            padding: 16px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             user-select: none;
@@ -28,178 +30,219 @@
         }
 
         header {
-            margin: 20px 0 30px 0;
-            text-align: center;
+            margin-bottom: 32px;
+            padding-top: 10px;
         }
 
         h1 {
-            font-size: 22px;
+            font-size: 26px;
             font-weight: 700;
-            margin-bottom: 4px;
+            margin: 0 0 6px 0;
+            letter-spacing: -0.5px;
         }
 
         .subtitle {
             font-size: 14px;
-            color: var(--hint-color);
+            color: var(--text-hint);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         /* Список режимов */
-        .modes-list {
+        .modes-container {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 16px;
         }
 
-        .mode-item {
-            background-color: var(--secondary-bg);
+        .mode-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
             border-radius: 16px;
-            padding: 16px;
+            padding: 20px;
             display: flex;
             align-items: center;
+            transition: all 0.2s ease;
             cursor: pointer;
-            border: 2px solid transparent;
-            transition: transform 0.1s ease, border-color 0.2s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        .mode-item:active {
-            transform: scale(0.98);
+        /* Эффект при нажатии */
+        .mode-card:active {
+            transform: scale(0.97);
+            background-color: #1a1a1a;
         }
 
-        .mode-item.selected {
-            border-color: var(--button-color);
-            background-color: var(--bg-color);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        .mode-card.selected {
+            border-color: var(--accent-color);
+            background-color: #0a111a; /* Очень слабый синий оттенок */
         }
 
         .mode-icon {
-            font-size: 32px;
-            margin-right: 16px;
-            width: 48px;
-            height: 48px;
+            width: 44px;
+            height: 44px;
+            background: #1c1c1e;
+            border-radius: 12px;
+            margin-right: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: var(--bg-color);
-            border-radius: 12px;
+            flex-shrink: 0;
         }
 
-        .mode-info {
-            flex-grow: 1;
+        .mode-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--accent-light);
+        }
+
+        .mode-details {
+            display: flex;
+            flex-direction: column;
         }
 
         .mode-name {
-            font-size: 17px;
+            font-size: 18px;
             font-weight: 600;
-            display: block;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
 
         .mode-desc {
             font-size: 13px;
-            color: var(--hint-color);
-            line-height: 1.3;
+            color: var(--text-hint);
+            line-height: 1.4;
         }
 
-        /* Кнопка входа */
-        .footer-action {
-            margin-top: 30px;
+        /* Нижняя область */
+        .actions {
+            margin-top: auto;
+            padding-top: 40px;
         }
 
-        .main-btn {
+        .btn-primary {
             width: 100%;
-            background-color: var(--button-color);
-            color: var(--button-text);
+            background-color: var(--accent-color);
+            color: #ffffff;
             border: none;
-            padding: 16px;
-            border-radius: 14px;
+            padding: 18px;
+            border-radius: 16px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
+            transition: opacity 0.2s;
         }
 
-        .main-btn:disabled {
-            opacity: 0.5;
+        .btn-primary:disabled {
+            background-color: #222222;
+            color: #555555;
             cursor: not-allowed;
+        }
+
+        /* Индикатор выбора внутри карточки (точка) */
+        .radio-indicator {
+            position: absolute;
+            right: 20px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid var(--card-border);
+        }
+
+        .selected .radio-indicator {
+            border-color: var(--accent-color);
+            background-color: var(--accent-color);
+            box-shadow: 0 0 10px var(--accent-color);
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Главное меню</h1>
-        <p class="subtitle">Выберите действие</p>
+        <p class="subtitle">Игровой хаб</p>
+        <h1>Выберите раздел</h1>
     </header>
 
-    <div class="modes-list">
+    <div class="modes-container">
         <!-- КРАФТ -->
-        <div class="mode-item" onclick="selectMode(this, 'craft')">
-            <div class="mode-icon">⚒️</div>
-            <div class="mode-info">
-                <span class="mode-name">Крафт</span>
-                <span class="mode-desc">Создавай новые предметы и улучшай снаряжение.</span>
+        <div class="mode-card" onclick="selectMode(this, 'craft')">
+            <div class="mode-icon">
+                <svg viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.5 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>
             </div>
+            <div class="mode-details">
+                <span class="mode-name">Крафт</span>
+                <span class="mode-desc">Создание и улучшение предметов</span>
+            </div>
+            <div class="radio-indicator"></div>
         </div>
 
         <!-- ПВП -->
-        <div class="mode-item" onclick="selectMode(this, 'pvp')">
-            <div class="mode-icon">⚔️</div>
-            <div class="mode-info">
-                <span class="mode-name">Пвп Сражения</span>
-                <span class="mode-desc">Брось вызов другим игрокам на арене.</span>
+        <div class="mode-card" onclick="selectMode(this, 'pvp')">
+            <div class="mode-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
             </div>
+            <div class="mode-details">
+                <span class="mode-name">ПвП Арена</span>
+                <span class="mode-desc">Сражения с другими игроками</span>
+            </div>
+            <div class="radio-indicator"></div>
         </div>
 
         <!-- КЕЙСЫ -->
-        <div class="mode-item" onclick="selectMode(this, 'cases')">
-            <div class="mode-icon">📦</div>
-            <div class="mode-info">
-                <span class="mode-name">Кейсы</span>
-                <span class="mode-desc">Испытай удачу и выбей редкие артефакты.</span>
+        <div class="mode-card" onclick="selectMode(this, 'cases')">
+            <div class="mode-icon">
+                <svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-8 0h-4V4h4v2z"/></svg>
             </div>
+            <div class="mode-details">
+                <span class="mode-name">Кейсы</span>
+                <span class="mode-desc">Открытие ящиков с лутом</span>
+            </div>
+            <div class="radio-indicator"></div>
         </div>
     </div>
 
-    <div class="footer-action">
-        <button class="main-btn" id="start-button" disabled onclick="go()">Выбрать режим</button>
+    <div class="actions">
+        <button class="btn-primary" id="main-btn" disabled onclick="handleStart()">Подтвердить</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.ready();
         tg.expand();
+        tg.enableClosingConfirmation();
+        
+        // Устанавливаем цвет статус-бара (черный)
+        tg.setHeaderColor('#000000');
+        tg.setBackgroundColor('#000000');
 
-        let currentMode = null;
-        const startBtn = document.getElementById('start-button');
+        let selectedId = null;
 
-        function selectMode(element, modeId) {
-            // Визуальное выделение
-            document.querySelectorAll('.mode-item').forEach(item => {
-                item.classList.remove('selected');
+        function selectMode(element, id) {
+            // Убираем выделение у всех
+            document.querySelectorAll('.mode-card').forEach(card => {
+                card.classList.remove('selected');
             });
-            element.classList.add('selected');
-
-            // Сохраняем выбор
-            currentMode = modeId;
             
-            // Активируем кнопку
-            startBtn.disabled = false;
-            startBtn.innerText = "Перейти в " + element.querySelector('.mode-name').innerText;
+            // Выделяем текущую
+            element.classList.add('selected');
+            selectedId = id;
 
-            // Виброотклик
-            tg.HapticFeedback.selectionChanged();
+            // Активируем кнопку
+            const btn = document.getElementById('main-btn');
+            btn.disabled = false;
+            btn.style.opacity = "1";
+
+            // Легкая вибрация
+            tg.HapticFeedback.impactOccurred('medium');
         }
 
-        function go() {
-            if (!currentMode) return;
-
-            // Отправляем данные боту и закрываем (или просто выполняем логику)
-            tg.sendData(JSON.stringify({
-                action: "navigate",
-                route: currentMode
-            }));
+        function handleStart() {
+            if (!selectedId) return;
             
-            // Для теста можно вывести алерт
-            // tg.showAlert("Вы переходите в режим: " + currentMode);
+            // Отправляем данные боту
+            tg.sendData(JSON.stringify({
+                type: 'navigation',
+                target: selectedId
+            }));
         }
     </script>
 </body>
