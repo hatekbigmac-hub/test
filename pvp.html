@@ -3,149 +3,334 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PvP Arena</title>
+    <title>PvP Arena Wheel</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #000000;
-            --card-bg: #111111;
-            --accent: #ff3b30; /* Красный для ПВП */
-            --text-main: #ffffff;
-            --text-hint: #888888;
+            --bg: #000000;
+            --card: #111111;
+            --accent: #2481cc;
+            --text: #ffffff;
+            --hint: #555555;
+            --border: #222222;
         }
 
         body {
             font-family: -apple-system, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0; padding: 20px;
-        }
-
-        /* Статус игрока */
-        .player-status {
-            background: linear-gradient(180deg, #111 0%, #000 100%);
-            border: 1px solid #222;
-            border-radius: 24px;
-            padding: 24px;
-            text-align: center;
-            margin-bottom: 24px;
-        }
-
-        .avatar-circle {
-            width: 80px;
-            height: 80px;
-            background: #1a1a1a;
-            border-radius: 50%;
-            margin: 0 auto 12px;
-            border: 2px solid var(--accent);
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 16px;
+            overflow: hidden; /* Чтобы не скроллилось лишний раз */
             display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .timer-container {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--hint);
+            margin-bottom: 4px;
+        }
+
+        #timer-value {
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        /* Основная область: Колесо и Список */
+        .main-layout {
+            display: flex;
+            flex: 1;
+            gap: 16px;
+            min-height: 0;
+        }
+
+        /* Секция с колесом */
+        .wheel-section {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            position: relative;
         }
 
-        .avatar-circle svg { width: 40px; fill: white; }
-
-        .stats-row {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 20px;
-            border-top: 1px solid #222;
-            padding-top: 15px;
+        .wheel-wrapper {
+            position: relative;
+            width: 260px;
+            height: 260px;
         }
 
-        .stat-item { display: flex; flex-direction: column; }
-        .stat-val { font-weight: 700; font-size: 18px; }
-        .stat-label { font-size: 11px; color: var(--text-hint); text-transform: uppercase; }
+        /* Стрелка колеса */
+        .wheel-arrow {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 20px solid var(--accent);
+        }
 
-        /* Список NFT снаряжения */
-        .inventory-title { font-size: 14px; color: var(--text-hint); margin-bottom: 12px; text-transform: uppercase; }
-        
-        .nft-item {
-            background: var(--card-bg);
+        #wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 4px solid var(--border);
+            position: relative;
+            overflow: hidden;
+            transition: transform 3s cubic-bezier(0.1, 0, 0.2, 1);
+            background: var(--card);
+        }
+
+        .wheel-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            background: var(--bg);
+            border: 3px solid var(--border);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+        }
+
+        /* Правая колонка: Список участников */
+        .participants-section {
+            flex: 0.8;
+            background: var(--card);
+            border: 1px solid var(--border);
             border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .list-header {
             padding: 12px;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--hint);
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+        }
+
+        #players-list {
+            flex: 1;
+            overflow-y: auto;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .player-item {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
             display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            border: 1px solid #222;
+            justify-content: space-between;
+            animation: fadeIn 0.3s ease;
         }
 
-        .nft-icon {
-            width: 40px; height: 40px; background: #000; border-radius: 10px;
-            margin-right: 12px; display: flex; align-items: center; justify-content: center;
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .player-name { font-weight: 500; }
+        .winner-tag { color: var(--accent); font-weight: bold; font-size: 10px; }
+
+        /* Нижняя кнопка */
+        .action-area {
+            margin-top: 16px;
         }
 
-        .nft-icon svg { width: 20px; fill: var(--accent); }
-
-        .nft-info { flex-grow: 1; }
-        .nft-name { font-size: 15px; font-weight: 600; }
-        .nft-power { font-size: 12px; color: var(--accent); }
-
-        .find-match-btn {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
+        .join-btn {
+            width: 100%;
             background: var(--accent);
-            color: white;
+            color: #fff;
             border: none;
-            padding: 18px;
-            border-radius: 16px;
+            padding: 16px;
+            border-radius: 14px;
             font-size: 16px;
-            font-weight: 700;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .join-btn:active { opacity: 0.8; }
+
+        /* Отрисовка текста на колесе (генерируется JS) */
+        .segment-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-origin: 0% 0%;
+            color: var(--text);
+            font-size: 10px;
+            white-space: nowrap;
+            padding-left: 60px;
+            font-weight: 500;
         }
     </style>
 </head>
 <body>
 
-    <div class="player-status">
-        <div class="avatar-circle">
-            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+    <header>
+        <div class="timer-container">Раунд через: <span id="timer-value">05</span>с</div>
+        <h1 style="font-size: 18px; margin: 0;">PvP Рулетка</h1>
+    </header>
+
+    <div class="main-layout">
+        <div class="wheel-section">
+            <div class="wheel-wrapper">
+                <div class="wheel-arrow"></div>
+                <div id="wheel">
+                    <!-- Сюда JS вставит сегменты -->
+                </div>
+                <div class="wheel-center"></div>
+            </div>
         </div>
-        <div class="username">Player_One</div>
-        <div class="stats-row">
-            <div class="stat-item"><span class="stat-val">1,240</span><span class="stat-label">Power</span></div>
-            <div class="stat-item"><span class="stat-val">84%</span><span class="stat-label">Win Rate</span></div>
+
+        <div class="participants-section">
+            <div class="list-header">Участники</div>
+            <ul id="players-list">
+                <!-- Сюда JS вставит ники -->
+            </ul>
         </div>
     </div>
 
-    <div class="inventory-title">Экипированные NFT</div>
-    
-    <div class="nft-item">
-        <div class="nft-icon">
-            <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
-        </div>
-        <div class="nft-info">
-            <div class="nft-name">Diamond Shield #042</div>
-            <div class="nft-power">+150 Defense</div>
-        </div>
+    <div class="action-area">
+        <button class="join-btn" onclick="joinGame()">Участвовать (NFT)</button>
     </div>
-
-    <div class="nft-item">
-        <div class="nft-icon">
-            <svg viewBox="0 0 24 24"><path d="M13.46 12L19 6.46 17.54 5 12 10.54 6.46 5 5 6.46 10.54 12 5 17.54 6.46 19 12 13.46 17.54 19 19 17.54 13.46 12z"/></svg>
-        </div>
-        <div class="nft-info">
-            <div class="nft-name">Plasma Blade #881</div>
-            <div class="nft-power">+320 Attack</div>
-        </div>
-    </div>
-
-    <button class="find-match-btn" onclick="startSearch()">В БОЙ</button>
 
     <script>
         const tg = window.Telegram.WebApp;
+        tg.expand();
         tg.BackButton.show();
-        tg.BackButton.onClick(() => {
-            window.location.href = 'index.html';
-        });
+        tg.BackButton.onClick(() => window.location.href = 'index.html');
 
-        function startSearch() {
-            tg.HapticFeedback.notificationOccurred('success');
-            const btn = document.querySelector('.find-match-btn');
-            btn.innerText = "ПОИСК ПРОТИВНИКА...";
-            btn.style.opacity = "0.7";
+        let players = [
+            { name: "CryptoKing" },
+            { name: "Alex_NFT" },
+            { name: "Degen44" },
+            { name: "SolanaLover" }
+        ];
+
+        let timeLeft = 5;
+        let isSpinning = false;
+
+        const wheelEl = document.getElementById('wheel');
+        const listEl = document.getElementById('players-list');
+        const timerVal = document.getElementById('timer-value');
+
+        // Инициализация
+        function init() {
+            renderPlayers();
+            startCountdown();
         }
+
+        function renderPlayers() {
+            // Очищаем список и колесо
+            listEl.innerHTML = '';
+            wheelEl.innerHTML = '';
+            
+            const count = players.length;
+            const angleStep = 360 / count;
+
+            players.forEach((p, i) => {
+                // Добавляем в список справа
+                const li = document.createElement('li');
+                li.className = 'player-item';
+                li.innerHTML = `<span class="player-name">${p.name}</span>`;
+                listEl.appendChild(li);
+
+                // Добавляем текст на колесо
+                const textDiv = document.createElement('div');
+                textDiv.className = 'segment-text';
+                textDiv.innerText = p.name;
+                // Поворачиваем текст на нужный угол
+                textDiv.style.transform = `rotate(${i * angleStep + angleStep/2}deg) translateY(-50%)`;
+                wheelEl.appendChild(textDiv);
+            });
+        }
+
+        function startCountdown() {
+            const timer = setInterval(() => {
+                if (isSpinning) return;
+
+                timeLeft--;
+                timerVal.innerText = timeLeft < 10 ? '0' + timeLeft : timeLeft;
+
+                if (timeLeft <= 0) {
+                    spinWheel();
+                    timeLeft = 10; // Следующий цикл длиннее (5с ожидание + время на кручение)
+                }
+            }, 1000);
+        }
+
+        function spinWheel() {
+            if (players.length < 2) return;
+            isSpinning = true;
+            
+            // Выбираем случайного победителя
+            const winnerIndex = Math.floor(Math.random() * players.length);
+            const extraSpins = 5; // 5 полных кругов
+            const angleStep = 360 / players.length;
+            
+            // Рассчитываем угол. Важно: крутим в обратную сторону или учитываем, что 0 градусов - это верх
+            const targetAngle = (extraSpins * 360) + (360 - (winnerIndex * angleStep + angleStep/2));
+
+            wheelEl.style.transform = `rotate(${targetAngle}deg)`;
+
+            // Вибрация в начале
+            tg.HapticFeedback.impactOccurred('heavy');
+
+            setTimeout(() => {
+                announceWinner(winnerIndex);
+            }, 3500); // 3.5 секунды - время анимации
+        }
+
+        function announceWinner(index) {
+            const winner = players[index];
+            tg.showAlert(`Победитель раунда: ${winner.name}!`);
+            
+            // Помечаем в списке
+            const items = document.querySelectorAll('.player-item');
+            items[index].innerHTML += `<span class="winner-tag">WIN</span>`;
+            items[index].style.backgroundColor = 'rgba(36, 129, 204, 0.1)';
+
+            // Сброс для следующего раунда
+            setTimeout(() => {
+                wheelEl.style.transition = 'none';
+                wheelEl.style.transform = 'rotate(0deg)';
+                setTimeout(() => {
+                    wheelEl.style.transition = 'transform 3s cubic-bezier(0.1, 0, 0.2, 1)';
+                    isSpinning = false;
+                    timeLeft = 5;
+                    // Здесь можно обновить список (удалить проигравших или оставить тех же)
+                }, 50);
+            }, 2000);
+        }
+
+        function joinGame() {
+            // Симуляция входа игрока
+            const myName = "You_" + Math.floor(Math.random() * 100);
+            players.push({ name: myName });
+            renderPlayers();
+            tg.HapticFeedback.notificationOccurred('success');
+        }
+
+        init();
     </script>
 </body>
 </html>
