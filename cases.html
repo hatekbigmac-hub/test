@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NFT Cases</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #000000;
+            --card-bg: #111111;
+            --accent: #007aff;
+            --text-main: #ffffff;
+            --text-hint: #666666;
+            --rarity-common: #888888;
+            --rarity-rare: #007aff;
+            --rarity-epic: #a335ee;
+        }
+
+        body {
+            font-family: -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0; padding: 20px;
+            -webkit-user-select: none;
+        }
+
+        header { margin-bottom: 24px; }
+        h1 { font-size: 24px; margin: 0; }
+        .info { color: var(--text-hint); font-size: 14px; margin-top: 4px; }
+
+        /* Сетка кейсов */
+        .case-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .case-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid #222;
+        }
+
+        .nft-preview {
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: linear-gradient(45deg, #1a1a1a, #000);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nft-preview svg { width: 50%; height: 50%; fill: var(--text-hint); }
+
+        .case-name { font-weight: 600; font-size: 15px; display: block; }
+        .case-price { color: var(--accent); font-size: 13px; font-weight: 700; margin-top: 4px; display: block; }
+
+        .btn-open {
+            margin-top: 12px;
+            width: 100%;
+            padding: 8px;
+            border-radius: 10px;
+            border: none;
+            background: #222;
+            color: white;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .case-card:active .btn-open { background: var(--accent); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>NFT Коллекции</h1>
+        <div class="info">Испытай удачу в дропе</div>
+    </header>
+
+    <div class="case-grid">
+        <div class="case-card">
+            <div class="nft-preview">
+                <svg viewBox="0 0 24 24"><path d="M21 16.5c0 .38-.21.71-.53.88l-7.9 4.44c-.16.09-.36.14-.57.14s-.41-.05-.57-.14l-7.9-4.44c-.31-.17-.53-.51-.53-.88V7.5c0-.38.21-.71.53-.88l7.9-4.44c.16-.09.36-.14.57-.14s.41.05.57.14l7.9 4.44c.31.17.53.51.53.88v9z"/></svg>
+            </div>
+            <span class="case-name">Starter Pack</span>
+            <span class="case-price">100 TON</span>
+            <button class="btn-open">Открыть</button>
+        </div>
+
+        <div class="case-card">
+            <div class="nft-preview" style="border: 1px solid var(--rarity-epic);">
+                <svg viewBox="0 0 24 24" style="fill: var(--rarity-epic);"><path d="M12 2L1 12l11 10 11-10L12 2z"/></svg>
+            </div>
+            <span class="case-name">Cyber Gift</span>
+            <span class="case-price">500 TON</span>
+            <button class="btn-open">Открыть</button>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.BackButton.show();
+        tg.BackButton.onClick(() => {
+            window.location.href = 'index.html';
+        });
+
+        document.querySelectorAll('.btn-open').forEach(btn => {
+            btn.onclick = () => {
+                tg.HapticFeedback.impactOccurred('medium');
+                tg.showAlert('Кейс открывается...');
+            };
+        });
+    </script>
+</body>
+</html>
