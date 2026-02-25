@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-bg: #050505;
+  --color-card: #111111;
+  --color-accent: #0088CC; /* TON Blue */
+  --color-gold: #FFD700;
+  --color-rarity-common: #8E9299;
+  --color-rarity-rare: #4A90E2;
+  --color-rarity-epic: #A335EE;
+  --color-rarity-legendary: #FF8000;
+  --color-rarity-mythic: #E6CC80;
+}
+
+@layer base {
+  body {
+    @apply bg-bg text-white font-sans antialiased overflow-x-hidden;
+    background-image: 
+      radial-gradient(circle at 50% -20%, rgba(0, 136, 204, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 0% 100%, rgba(163, 53, 238, 0.05) 0%, transparent 40%);
+    min-height: 100vh;
+  }
+}
+
+.glass {
+  @apply bg-white/5 backdrop-blur-xl border border-white/10;
+}
+
+.rarity-glow-common { box-shadow: 0 0 20px rgba(142, 146, 153, 0.1); }
+.rarity-glow-rare { box-shadow: 0 0 20px rgba(74, 144, 226, 0.2); }
+.rarity-glow-epic { box-shadow: 0 0 20px rgba(163, 53, 238, 0.2); }
+.rarity-glow-legendary { box-shadow: 0 0 20px rgba(255, 128, 0, 0.2); }
+.rarity-glow-mythic { box-shadow: 0 0 20px rgba(230, 204, 128, 0.3); }
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-white/10 rounded-full;
+}
+
